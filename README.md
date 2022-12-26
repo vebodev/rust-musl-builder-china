@@ -1,18 +1,6 @@
 # `rust-musl-builder`: Docker container for easily building static Rust binaries
 
-[![Docker Image](https://img.shields.io/docker/pulls/ekidd/rust-musl-builder.svg?maxAge=2592000)](https://hub.docker.com/r/ekidd/rust-musl-builder/)
-
-- [Source on GitHub](https://github.com/emk/rust-musl-builder)
-- [Changelog](https://github.com/emk/rust-musl-builder/blob/master/CHANGELOG.md)
-
-**UPDATED:** We are now running builds on GitHub, including scheduled builds of `stable` and `beta` every Thursday!
-
-However, **[`rustls`](rustls) now works well** with most of the Rust ecosystem, including `reqwest`, `tokio`, `tokio-postgres`, `sqlx` and many others. The only major project which still requires `libpq` and OpenSSL is [Diesel](https://diesel.rs/). If you don't need `diesel` or `libpq`:
-
-- See if you can switch away from OpenSSL, typically by using `features` in `Cargo.toml` to ask your dependencies to use [`rustls`](rustls) instead.
-- If you don't need OpenSSL, try [`cross build --target=x86_64-unknown-linux-musl --release`](https://github.com/rust-embedded/cross) to cross-compile your binaries for `libmusl`. This supports many more platforms, with less hassle!
-
-[rustls]: https://github.com/rustls
+This repository is a fork of [ekidd/rust-musl-builder](https://github.com/emk/rust-musl-builder) image, with more recent dependencies (as of December 2022).
 
 ## What is this?
 
@@ -21,7 +9,7 @@ This image allows you to build static Rust binaries using `diesel`, `sqlx` or `o
 To try it, run:
 
 ```sh
-alias rust-musl-builder='docker run --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder'
+alias rust-musl-builder='docker run --rm -it -v "$(pwd)":/home/rust/src nasqueron/rust-musl-builder'
 rust-musl-builder cargo build --release
 ```
 
@@ -32,27 +20,6 @@ For a more realistic example, see the `Dockerfile`s for [examples/using-diesel](
 ## Deploying your Rust application
 
 With a bit of luck, you should be able to just copy your application binary from `target/x86_64-unknown-linux-musl/release`, and install it directly on any reasonably modern x86_64 Linux machine.  In particular, you should be able make static release binaries using TravisCI and GitHub, or you can copy your Rust application into an [Alpine Linux container][]. See below for details!
-
-## Available tags
-
-In general, we provide the following tagged Docker images:
-
-- `latest`, `stable`: Current stable Rust, now with OpenSSL 1.1. We
-  try to update this fairly rapidly after every new stable release, and
-  after most point releases.
-- `X.Y.Z`: Specific versions of stable Rust.
-- `beta`: This usually gets updated every six weeks alongside the stable
-  release. It will usually not be updated for beta bugfix releases.
-- `nightly-YYYY-MM-DD`: Specific nightly releases. These should almost
-  always support `clippy`, `rls` and `rustfmt`, as verified using
-  [rustup components history][comp]. If you need a specific date for
-  compatibility with `tokio` or another popular library using unstable
-  Rust, please file an issue.
-
-At a minimum, each of these images should be able to
-compile [examples/using-diesel](./examples/using-diesel) and [examples/using-sqlx](./examples/using-sqlx).
-
-[comp]: https://rust-lang.github.io/rustup-components-history/index.html
 
 ## Caching builds
 
@@ -163,7 +130,7 @@ Next, copy [`build-release`](./examples/build-release) into your project and run
 Finally, add a `Dockerfile` to perform the actual build:
 
 ```Dockerfile
-FROM ekidd/rust-musl-builder
+FROM nasqueron/rust-musl-builder
 
 # We need to add the source code to the image because `rust-musl-builder`
 # assumes a UID of 1000, but TravisCI has switched to 2000.
@@ -189,7 +156,7 @@ Docker now supports [multistage builds][multistage], which make it easy to build
 
 ## Adding more C libraries
 
-If you're using Docker crates which require specific C libraries to be installed, you can create a `Dockerfile` based on this one, and use `musl-gcc` to compile the libraries you need.  For an example, see [`examples/adding-a-library/Dockerfile`](./examples/adding-a-library/Dockerfile). This usually involves a bit of experimentation for each new library, but it seems to work well for most simple, standalone libraries.
+If you're using Docker crates which require specific C libraries to be installed, you can create a `Dockerfile` based on this one, and use `musl-gcc` to compile the libraries you need. For an example, see [`examples/adding-a-library/Dockerfile`](./examples/adding-a-library/Dockerfile). This usually involves a bit of experimentation for each new library, but it seems to work well for most simple, standalone libraries.
 
 If you need an especially common library, please feel free to submit a pull request adding it to the main `Dockerfile`!  We'd like to support popular Rust crates out of the box.
 
