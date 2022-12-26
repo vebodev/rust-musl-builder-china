@@ -9,7 +9,7 @@ ARG TOOLCHAIN=stable
 # - https://www.openssl.org/source/
 #
 # ALSO UPDATE hooks/build!
-ARG OPENSSL_VERSION=1.1.1m
+ARG OPENSSL_VERSION=1.1.1s
 
 # Versions for other dependencies. Here are the places to check for new
 # releases:
@@ -24,13 +24,13 @@ ARG OPENSSL_VERSION=1.1.1m
 #
 # We're stuck on PostgreSQL 11 until we figure out
 # https://github.com/emk/rust-musl-builder/issues.
-ARG MDBOOK_VERSION=0.4.14
-ARG MDBOOK_GRAPHVIZ_VERSION=0.1.3
-ARG CARGO_ABOUT_VERSION=0.4.4
-ARG CARGO_AUDIT_VERSION=0.16.0
-ARG CARGO_DENY_VERSION=0.11.0
-ARG ZLIB_VERSION=1.2.11
-ARG POSTGRESQL_VERSION=11.14
+ARG MDBOOK_VERSION=0.4.25
+ARG MDBOOK_GRAPHVIZ_VERSION=0.1.5
+ARG CARGO_ABOUT_VERSION=0.5.2
+ARG CARGO_AUDIT_VERSION=0.17.4
+ARG CARGO_DENY_VERSION=0.13.5
+ARG ZLIB_VERSION=1.2.13
+ARG POSTGRESQL_VERSION=11.18
 
 # Make sure we have basic dev tools for building C libraries.  Our goal here is
 # to support the musl-libc builds and Cargo builds needed for a large selection
