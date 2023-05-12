@@ -1,62 +1,56 @@
-# `rust-musl-builder`: Docker container for easily building static Rust binaries
+# `rust-musl-builder-china`: 用于编译构建 Rust 静态链接的 Docker 容器
 
-This repository is a fork of [nasqueron/rust-musl-builder](https://github.com/nasqueron/rust-musl-builder), opted for China networks.
+本项目在以下开源项目基础上修改，以适合中国的网络环境。
 
-## What is the headache of rust developers in China?
+- This repository is a fork of [nasqueron/rust-musl-builder](https://github.com/nasqueron/rust-musl-builder), opt for China networks.
+- Original from [ekidd/rust-musl-builder](https://github.com/emk/rust-musl-builder).
 
-1. Github is not stable to access.
-2. crates-io is quite frigle
-3. Ubuntu sources is slow.
+## 为什么需要这个项目？
 
-## What is this?
+1. crates-io 连接不稳定，经常下载依赖包失败。
+2. Ubuntu官方源速度太慢
 
-This image allows you to build static Rust binaries using `diesel`, `sqlx` or `openssl`. These images can be distributed as single executable files with no dependencies, and they should work on any modern Linux system.
+## 解决什么问题？
 
-To try it, run:
+这个项目镜像可用于构建编译 Rust 静态链接的库或可执行文件，这些文件可以在任何现代 Linux 系统上运行，而无需依赖。镜像已经预制了`diesel`，`sqlx`，`openssl`等静态库，可以直接使用。编译出的文件可以直接复制到任何现代 Linux 系统上直接运行，而无须安装依赖其他包。
 
-```sh
-alias rust-musl-builder='docker run --rm -it -v "$(pwd)":/home/rust/src nasqueron/rust-musl-builder'
-rust-musl-builder cargo build --release
-```
+## 使用方法
 
-This command assumes that `$(pwd)` is readable and writable by uid 1000, gid 1000. At the moment, it doesn't attempt to cache libraries between builds, so this is best reserved for making final release builds.
-
-For a more realistic example, see the `Dockerfile`s for [examples/using-diesel](./examples/using-diesel) and [examples/using-sqlx](./examples/using-sqlx).
-
-## Deploying your Rust application
-
-With a bit of luck, you should be able to just copy your application binary from `target/x86_64-unknown-linux-musl/release`, and install it directly on any reasonably modern x86_64 Linux machine.  In particular, you should be able make static release binaries using TravisCI and GitHub, or you can copy your Rust application into an [Alpine Linux container][]. See below for details!
-
-## Caching builds
-
-You may be able to speed up build performance by adding the following `-v` commands to the `rust-musl-builder` alias:
+全量构建, 用于 CI/CD:
 
 ```sh
--v cargo-git:/home/rust/.cargo/git
--v cargo-registry:/home/rust/.cargo/registry
--v target:/home/rust/src/target
+alias rust-builder='docker run --rm -it -v "$(pwd)":/home/rust/src rust-musl-builder-china'
+rust-builder cargo build --release
+
 ```
 
-You will also need to fix the permissions on the mounted volumes:
+增量构建，用于开发环境中:
 
 ```sh
-rust-musl-builder sudo chown -R rust:rust \
-  /home/rust/.cargo/git /home/rust/.cargo/registry /home/rust/src/target
+alias rust-builder='docker run --rm -it -v cargo-git:/home/rust/.cargo/git -v cargo-registry:/home/rust/.cargo/registry -v target:/home/rust/src/target -v "$(pwd)":/home/rust/src rust-musl-builder-china'
+rust-builder sudo chown -R rust:rust /home/rust/.cargo/git /home/rust/.cargo/registry /home/rust/src/target
+rust-builder cargo build --release
 ```
+
+更多例子可以看 [examples/using-diesel](./examples/using-diesel) 和 [examples/using-sqlx](./examples/using-sqlx).
+
+## Rust 编译结果
+
+编译的二进制文件在 `target/x86_64-unknown-linux-musl/release`, 直接拷贝到 x86_64 的Linux 主机上执行即可. 
+
+In particular, you should be able make static release binaries using TravisCI and GitHub, or you can copy your Rust application into an [Alpine Linux container][]. See below for details!
 
 ## How it works
 
-`rust-musl-builder` uses [musl-libc][], [musl-gcc][], and the new [rustup][] `target` support.  It includes static versions of several libraries:
+`rust-musl-builder-china` 安装了 [musl-libc][], [musl-gcc][], 和 [rustup][] `target`.  包括了以下库的静态版本: 
 
-- The standard `musl-libc` libraries.
-- OpenSSL, which is needed by many Rust applications.
-- `libpq`, which is needed for applications that use `diesel` with PostgreSQL.
-- `libz`, which is needed by `libpq`.
-- SQLite3. See [examples/using-diesel](./examples/using-diesel/).
+- 标准 `musl-libc` 库
+- OpenSSL, 被很多库依赖使用
+- `libpq`,  被 `diesel` 依赖
+- `libz`,  被 `libpq` 依赖
+- SQLite3, [examples/using-diesel](./examples/using-diesel/).
 
-This library also sets up the environment variables needed to compile popular Rust crates using these libraries.
-
-## Extras
+## 其他
 
 This image also supports the following extra goodies:
 
