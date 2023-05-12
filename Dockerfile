@@ -38,7 +38,8 @@ ARG POSTGRESQL_VERSION=11.18
 #
 # We also set up a `rust` user by default. This user has sudo privileges if you
 # need to install any more software.
-RUN apt-get update && \
+RUN sed -i 's/archive.ubuntu.com/mirrors.163.com/g' /etc/apt/sources.list && \
+    apt-get update && \
     export DEBIAN_FRONTEND=noninteractive && \
     apt-get install -yq \
         build-essential \

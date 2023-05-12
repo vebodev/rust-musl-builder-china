@@ -1,6 +1,12 @@
 # `rust-musl-builder`: Docker container for easily building static Rust binaries
 
-This repository is a fork of [ekidd/rust-musl-builder](https://github.com/emk/rust-musl-builder) image, with more recent dependencies (as of December 2022).
+This repository is a fork of [nasqueron/rust-musl-builder](https://github.com/nasqueron/rust-musl-builder), opted for China networks.
+
+## What is the headache of rust developers in China?
+
+1. Github is not stable to access.
+2. crates-io is quite frigle
+3. Ubuntu sources is slow.
 
 ## What is this?
 
