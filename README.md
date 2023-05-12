@@ -12,7 +12,7 @@
 
 ## 解决什么问题？
 
-这个项目镜像可用于构建编译 Rust 静态链接的库或可执行文件，这些文件可以在任何现代 Linux 系统上运行，而无需依赖。镜像已经预制了`diesel`，`sqlx`，`openssl`等静态库，可以直接使用。编译出的文件可以直接复制到任何现代 Linux 系统上直接运行，而无须安装依赖其他包。
+这个项目镜像可用于构建编译 Rust 静态链接的库或可执行文件，这些文件可以在任何现代 Linux 系统上运行，而无需依赖。镜像已经预制了`diesel`，`sqlx`，`openssl`等静态库，可以直接使用。编译出的文件可以直接复制到任何现代 Linux 系统上直接运行，而无须安装其他依赖包。
 
 ## 使用方法
 
@@ -27,7 +27,7 @@ rust-builder cargo build --release
 增量构建，用于开发环境中:
 
 ```sh
-alias rust-builder='docker run --rm -it -v cargo-git:/home/rust/.cargo/git -v cargo-registry:/home/rust/.cargo/registry -v target:/home/rust/src/target -v "$(pwd)":/home/rust/src rust-musl-builder-china'
+alias rust-builder='docker run --rm -it -v cargo-git:/home/rust/.cargo/git -v cargo-registry:/home/rust/.cargo/registry -v "$(pwd)":/home/rust/src rust-musl-builder-china'
 rust-builder sudo chown -R rust:rust /home/rust/.cargo/git /home/rust/.cargo/registry /home/rust/src/target
 rust-builder cargo build --release
 ```

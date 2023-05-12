@@ -56,11 +56,16 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.163.com/g' /etc/apt/sources.list && \
         linux-libc-dev \
         pkgconf \
         sudo \
+        tzdata \
         unzip \
         xutils-dev \
         && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
     useradd rust --user-group --create-home --shell /bin/bash --groups sudo
+
+# Set timezone to Asia/Chongqing
+RUN ln -sf /usr/share/zoneinfo/Asia/Chongqing /etc/localtime && \
+    echo "Asia/Chongqing" > /etc/timezone
 
 # - `mdbook` is the standard Rust tool for making searchable HTML manuals.
 # - `mdbook-graphviz` allows using inline GraphViz drawing commands to add illustrations.
@@ -184,6 +189,7 @@ ENV X86_64_UNKNOWN_LINUX_MUSL_OPENSSL_DIR=/usr/local/musl/ \
 #
 # - `cargo-deb` builds Debian packages.
 RUN env CARGO_HOME=/opt/rust/cargo cargo install -f cargo-deb && \
+    cargo install -f cargo-watch && \
     rm -rf /opt/rust/cargo/registry/
 
 # Allow sudo without a password.
