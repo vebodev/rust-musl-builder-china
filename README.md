@@ -52,17 +52,18 @@ In particular, you should be able make static release binaries using TravisCI an
 
 ## 其他
 
-This image also supports the following extra goodies:
+还支持了以下基础包的能力：
 
-- Basic compilation for `armv7` using `musl-libc`. Not all libraries are supported at the moment, however.
-- [`mdbook`][mdbook] and `mdbook-graphviz` for building searchable HTML documentation from Markdown files. Build manuals to use alongside your `cargo doc` output!
-- [`cargo about`][about] to collect licenses for your dependencies.
-- [`cargo deb`][deb] to build Debian packages
-- [`cargo deny`][deny] to check your Rust project for known security issues.
+- 通过 `musl-libc` 支持 `armv7` 编译。但是还没有支持全部库。
+- [`mdbook`][mdbook] 和 `mdbook-graphviz`  用来从 Markdown 生成 HTML 文档。 执行 `cargo doc` 即可!
+- [`cargo about`][about] 用于收集依赖库的 License 信息.
+- [`cargo deb`][deb] 创建 Debian 包 
+- [`cargo deny`][deny] 扫描 Rust 工程中是否有安全漏洞.
+- [`cargo watch`][watch] 用于监控文件变化，自动编译.
 
-## Making OpenSSL work
+## 如何在项目中使用 OpenSSL ?
 
-If your application uses OpenSSL, you will also need to take a few extra steps to make sure that it can find OpenSSL's list of trusted certificates, which is stored in different locations on different Linux distributions. You can do this using [`openssl-probe`](https://crates.io/crates/openssl-probe) as follows:
+当 Rust 项目使用 OpenSSL时，还需要额外的步骤，以便让 OpenSSL 能够找到系统的证书列表。不同的 Linux 发行版，证书列表的存储位置不同。可以使用 [`openssl-probe`](https://crates.io/crates/openssl-probe) 来解决这个问题:
 
 ```rust
 fn main() {
@@ -71,22 +72,22 @@ fn main() {
 }
 ```
 
-## Making Diesel work
+## 编译使用 Diesel 项目
 
-In addition to setting up OpenSSL, you'll need to add the following lines to your `Cargo.toml`:
+除了上述设置 OpenSSL，还需要配置 `Cargo.toml`:
 
 ```toml
 [dependencies]
 diesel = { version = "1", features = ["postgres", "sqlite"] }
 
-# Needed for sqlite.
+# 当使用 SQLite3 时
 libsqlite3-sys = { version = "*", features = ["bundled"] }
 
-# Needed for Postgres.
+# 当使用 Postgres 时 
 openssl = "*"
 ```
 
-For PostgreSQL, you'll also need to include `diesel` and `openssl` in your `main.rs` in the following order (in order to avoid linker errors):
+使用 PostgreSQL 时，还需要在 `main.rs` 中添加 `diesel` 和 `openssl`，并且需要按照以下顺序，以避免链接错误:
 
 ```rust
 extern crate openssl;
@@ -94,13 +95,13 @@ extern crate openssl;
 extern crate diesel;
 ```
 
-If this doesn't work, you _might_ be able to fix it by reversing the order. See [this PR](https://github.com/emk/rust-musl-builder/issues/69) for a discussion of the latest issues involved in linking to `diesel`, `pq-sys` and `openssl-sys`.
+ 如果遇到编译错误，可以尝试调整顺序。参考 [this PR](https://github.com/emk/rust-musl-builder/issues/69).
 
-## Making static releases with Travis CI and GitHub
+## 在Travis CI 和 GitHub 编译静态链接的二进制文件
 
-These instructions are inspired by [rust-cross][].
+参考自 [rust-cross][].
 
-First, read the [Travis CI: GitHub Releases Uploading][uploading] page, and run `travis setup releases` as instructed.  Then add the following lines to your existing `.travis.yml` file, replacing `myapp` with the name of your package:
+首先, 阅读 [Travis CI: GitHub Releases Uploading][uploading] 页面，按照指示运行 `travis setup releases`。然后在你的 `.travis.yml` 文件中添加以下行，将 `myapp` 替换为你的包名:
 
 ```yaml
 language: rust
@@ -125,12 +126,12 @@ deploy:
     tags: true
 ```
 
-Next, copy [`build-release`](./examples/build-release) into your project and run `chmod +x build-release`.
+然后, 在项目中添加一个 `build-release` 脚本，用于构建 Linux 和 Mac 版本的二进制文件:
 
-Finally, add a `Dockerfile` to perform the actual build:
+最后, 添加一个 `Dockerfile` 用于执行实际的构建:
 
 ```Dockerfile
-FROM nasqueron/rust-musl-builder
+FROM vebodev/rust-musl-builder-china
 
 # We need to add the source code to the image because `rust-musl-builder`
 # assumes a UID of 1000, but TravisCI has switched to 2000.
@@ -139,43 +140,43 @@ ADD --chown=rust:rust . ./
 CMD cargo build --release
 ```
 
-When you push a new tag to your project, `build-release` will automatically build new Linux binaries using `rust-musl-builder`, and new Mac binaries with Cargo, and it will upload both to the GitHub releases page for your repository.
+当你推送一个新的 tag 到你的项目时，`build-release` 会自动使用 `rust-musl-builder` 构建新的 Linux 二进制文件，使用 Cargo 构建 Mac 二进制文件，并且会自动上传到 GitHub releases 页面。
 
-For a working example, see [faradayio/cage][cage].
+例子在 [faradayio/cage][cage].
 
 [rust-cross]: https://github.com/japaric/rust-cross
 [uploading]: https://docs.travis-ci.com/user/deployment/releases
 [cage]: https://github.com/faradayio/cage
 
-## Making tiny Docker images with Alpine Linux and Rust binaries
+## 基于 Alpine Linux 构建小空间的 Docker 容器
 
-Docker now supports [multistage builds][multistage], which make it easy to build your Rust application with `rust-musl-builder` and deploy it using [Alpine Linux][]. For a working example, see [`examples/using-diesel/Dockerfile`](./examples/using-diesel/Dockerfile).
+Docker 支持了 [multistage builds][multistage]，可以很容易的使用 `rust-musl-builder` 构建 Rust 应用，并且使用 [Alpine Linux][] 部署。参考 [`examples/using-diesel/Dockerfile`](./examples/using-diesel/Dockerfile).
 
 [multistage]: https://docs.docker.com/engine/userguide/eng-image/multistage-build/
 [Alpine Linux]: https://alpinelinux.org/
 
-## Adding more C libraries
+## 增加其他 C 语言的库
 
-If you're using Docker crates which require specific C libraries to be installed, you can create a `Dockerfile` based on this one, and use `musl-gcc` to compile the libraries you need. For an example, see [`examples/adding-a-library/Dockerfile`](./examples/adding-a-library/Dockerfile). This usually involves a bit of experimentation for each new library, but it seems to work well for most simple, standalone libraries.
+ 如果你的项目还依赖了其他 C 语言的库，可以在 `Dockerfile` 中，增加 `musl-gcc` 编译库的步骤。例子：[`examples/adding-a-library/Dockerfile`](./examples/adding-a-library/Dockerfile). 编译每个库的情况可能略有不同，需要按实际情况调整。
 
-If you need an especially common library, please feel free to submit a pull request adding it to the main `Dockerfile`!  We'd like to support popular Rust crates out of the box.
+也欢迎提交 PR 把你用到的三方库合并到这个 Dockerfile 中。
 
-## Development notes
+## 开发必读
 
-After modifying the image, run `./test-image` to make sure that everything works.
+开发修改后，可以执行 `./test-image` 来测试.
 
-## Other ways to build portable Rust binaries
+## 参考资料
 
-If for some reason this image doesn't meet your needs, there's a variety of other people working on similar projects:
-
-- [messense/rust-musl-cross](https://github.com/messense/rust-musl-cross) shows how to build binaries for many different architectures.
-- [japaric/rust-cross](https://github.com/japaric/rust-cross) has extensive instructions on how to cross-compile Rust applications.
-- [clux/muslrust](https://github.com/clux/muslrust) also supports libcurl.
-- [golddranks/rust_musl_docker](https://github.com/golddranks/rust_musl_docker). Another Docker image.
+- [nasqueron/rust-musl-builder](https://github.com/nasqueron/rust-musl-builder)
+- [ekidd/rust-musl-builder](https://github.com/emk/rust-musl-builder).
+- [messense/rust-musl-cross](https://github.com/messense/rust-musl-cross) 
+- [japaric/rust-cross](https://github.com/japaric/rust-cross) 
+- [clux/muslrust](https://github.com/clux/muslrust) 
+- [golddranks/rust_musl_docker](https://github.com/golddranks/rust_musl_docker)
 
 ## License
 
-Either the [Apache 2.0 license](./LICENSE-APACHE.txt), or the
+[Apache 2.0 license](./LICENSE-APACHE.txt), 或
 [MIT license](./LICENSE-MIT.txt).
 
 [Alpine Linux container]: https://hub.docker.com/_/alpine/
