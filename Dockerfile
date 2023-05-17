@@ -31,6 +31,7 @@ ARG CARGO_AUDIT_VERSION=0.17.4
 ARG CARGO_DENY_VERSION=0.13.5
 ARG ZLIB_VERSION=1.2.13
 ARG POSTGRESQL_VERSION=11.18
+ARG UNIXODBC_VERSION=2.3.11
 
 # Make sure we have basic dev tools for building C libraries.  Our goal here is
 # to support the musl-libc builds and Cargo builds needed for a large selection
@@ -58,6 +59,7 @@ RUN sed -i 's/archive.ubuntu.com/mirrors.163.com/g' /etc/apt/sources.list && \
         sudo \
         tzdata \
         unzip \
+        upx \
         xutils-dev \
         && \
     apt-get clean && rm -rf /var/lib/apt/lists/* && \
@@ -138,7 +140,13 @@ RUN echo "Building libpq" && \
     cd ../../bin/pg_config && make && make install && \
     rm -r /tmp/*
 
-# (Please feel free to submit pull requests for musl-libc builds of other C
+RUN echo "Building unixodbc" && \
+    cd /root && \
+    curl -fLO "https://www.unixodbc.org/unixODBC-${UNIXODBC_VERSION}.tar.gz" && \
+    tar xzf "unixODBC-${UNIXODBC_VERSION}.tar.gz" && cd "unixODBC-${UNIXODBC_VERSION}" && \
+    CC=musl-gcc CFLAGS=-static ./configure --prefix=/usr/local/musl --enable-static --disable-shared && \
+    make && make install
+
 # libraries needed by the most popular and common Rust crates, to avoid
 # everybody needing to build them manually.)
 
