@@ -1,7 +1,7 @@
 [build]
 # Target musl-libc by default when running Cargo.
 target = "x86_64-unknown-linux-musl"
-rustflags = [ "-L /usr/local/musl/lib" ]
+rustflags = [ "-L", "/usr/local/musl/lib" ]
 
 [source.crates-io]
 registry = "https://rsproxy.cn/crates.io-index"
