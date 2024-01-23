@@ -29,7 +29,7 @@ ARG MDBOOK_GRAPHVIZ_VERSION=0.1.5
 ARG CARGO_ABOUT_VERSION=0.5.2
 ARG CARGO_AUDIT_VERSION=0.17.4
 ARG CARGO_DENY_VERSION=0.13.5
-ARG ZLIB_VERSION=1.2.13
+ARG ZLIB_VERSION=1.3.1
 ARG POSTGRESQL_VERSION=11.18
 ARG UNIXODBC_VERSION=2.3.11
 
@@ -39,8 +39,9 @@ ARG UNIXODBC_VERSION=2.3.11
 #
 # We also set up a `rust` user by default. This user has sudo privileges if you
 # need to install any more software.
-RUN sed -i 's/archive.ubuntu.com/mirrors.163.com/g' /etc/apt/sources.list && \
-    apt-get update && \
+#COPY sources.list /etc/apt/sources.list
+#RUN wget -O /etc/apt/sources.list 'https://mirrors.163.com/.help/sources.list.bionic' \
+RUN apt-get update && \
     export DEBIAN_FRONTEND=noninteractive && \
     apt-get install -yq \
         build-essential \
@@ -208,7 +209,7 @@ ADD sudoers /etc/sudoers.d/nopasswd
 #
 # You should be able to switch back to `USER root` from another `Dockerfile`
 # using this image if you need to do so.
-USER rust
+USER root
 RUN mkdir -p /home/rust/libs /home/rust/src /home/rust/.cargo && \
     ln -s /opt/rust/cargo/config /home/rust/.cargo/config && \
     git config --global credential.https://github.com.helper ghtoken

@@ -19,7 +19,7 @@
 全量构建, 用于 CI/CD:
 
 ```sh
-alias rust-builder='docker run --rm -it -v "$(pwd)":/home/rust/src rust-musl-builder-china'
+alias rust-builder='docker run --rm -it -v "$(pwd)":/home/rust/src vebodev/rust-musl-builder-china'
 rust-builder cargo build --release
 
 ```
